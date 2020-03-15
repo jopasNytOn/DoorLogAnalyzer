@@ -21,7 +21,7 @@ row = 3
 while sheet['C{}'.format(row)].value != None:
     row += 1
 row -= 1
-print('Found {} rows altogether\n\n'.format(row))
+print('Found {} rows altogether'.format(row))
 
 problems = 0
 saved_date = saved_timestamp = saved_row = None
@@ -42,6 +42,8 @@ while row != 2:
             new_date = sheet['A{}'.format(row)].value
             new_timestamp = convert_date_string_to_date_timestamp(new_date)
             if new_timestamp - saved_timestamp > maximum_seconds_to_request_close:
+                if problems == 0:
+                    print('\n')
                 print('{} ({}): Door at fully open position'.format(saved_date, saved_row))
                 print('{} ({}): Close door requested'.format(new_date, row))
                 print('---')
@@ -49,4 +51,5 @@ while row != 2:
         saved_date = saved_timestamp = saved_row = None
     row -= 1
 
-print('\n\nFound {} problems'.format(problems))
+plural = "" if problems == 1 else "s"
+print('\n\nFound {} problem{}'.format(problems, plural))
