@@ -19,30 +19,38 @@ class ExcelFile():
         self.wb = load_workbook(filename=self.filename)
         self.sheet = self.wb['Sheet 1']
 
-        # First two rows contain special text that are ignored.
+        # First a couple of rows contain special text that are ignored.
         # The data is read from last to first row due to ascending time.
-        self.row = 3
-        while self.get_data_from_cell('C') != None:
+        self.row = 1
+        if self.get_data_from_cell('A', 1) == "Time":
+            self.row += 1
+        try:
+            if self.get_data_from_cell('A', 2) == "Column1":
+                self.row += 1
+        except ValueError:
+            pass
+        self.last_special_row = self.row - 1
+        while self.get_data_from_cell('C', self.row) != None:
             self.row += 1
         self.row -= 1
         print('Found {} rows altogether'.format(self.row))
 
-    def get_data_from_cell(self, column):
-        return self.sheet['{}{}'.format(column, self.row)].value
+    def get_data_from_cell(self, column, row):
+        return self.sheet['{}{}'.format(column, row)].value
 
     def data_remains(self):
         self.row -= 1
-        return self.row != 2
+        return self.row != self.last_special_row
 
     def get_row(self):
         return self.row
 
     def get_date(self):
-        date = self.get_data_from_cell('A')
+        date = self.get_data_from_cell('A', self.row)
         return date, convert_date_string_to_date_timestamp(date)
 
     def get_message(self):
-        return self.get_data_from_cell('D')
+        return self.get_data_from_cell('D', self.row)
 
 
 class Message():

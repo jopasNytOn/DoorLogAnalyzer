@@ -54,6 +54,18 @@ Found 42 rows altogether\n\
 Found 1 problem\
 '
 
+printing_log_OnlyOneHeaderRow = '\
+Found 14 rows altogether\n\
+\n\
+\n\
+2020-03-29 10:22:43.925 (7): Door at fully open position\n\
+2020-03-29 10:23:41.979 (2): Close door requested\n\
+---\n\
+\n\
+\n\
+Found 1 problem\
+'
+
 
 class TestDoorLogAnalyzer(unittest.TestCase):
 
@@ -76,6 +88,10 @@ class TestDoorLogAnalyzer(unittest.TestCase):
     def test_log_OpenDoorRequestedWhenInFullyClosedPosition(self):
         value = call_command("python DoorLogAnalyzer.py test/Log_OpenDoorRequestedWhenInFullyClosedPosition.xlsx")
         self.assertEqual(printing_log_OpenDoorRequestedWhenInFullyClosedPosition, value)
+
+    def test_log_OnlyOneHeaderRow(self):
+        value = call_command("python DoorLogAnalyzer.py test/Log_OnlyOneHeaderRow.xlsx")
+        self.assertEqual(printing_log_OnlyOneHeaderRow, value)
 
 
 if __name__ == '__main__':
