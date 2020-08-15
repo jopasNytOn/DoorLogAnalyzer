@@ -16,7 +16,7 @@ Found 18 rows altogether\n\
 \n\
 \n\
 2020-02-07 10:51:12.680 (13): Door at fully open position\n\
-2020-02-07 10:51:32.744 (9): Close door requested\n\
+2020-02-07 10:51:43.294 (6): Door is closing and is at or below 50 mm from fully closed position\n\
 ---\n\
 \n\
 \n\
@@ -35,7 +35,7 @@ Found 54 rows altogether\n\
 \n\
 \n\
 2020-02-11 23:59:26.898 (48): Door at fully open position\n\
-2020-02-12 05:05:32.030 (8): Close door requested\n\
+2020-02-12 05:05:44.484 (5): Door is closing and is at or below 50 mm from fully closed position\n\
 ---\n\
 \n\
 \n\
@@ -47,7 +47,7 @@ Found 42 rows altogether\n\
 \n\
 \n\
 2020-02-17 13:13:00.875 (37): Door at fully open position\n\
-2020-02-17 13:43:34.376 (8): Close door requested\n\
+2020-02-17 13:43:44.765 (5): Door is closing and is at or below 50 mm from fully closed position\n\
 ---\n\
 \n\
 \n\
@@ -55,11 +55,23 @@ Found 1 problem\
 '
 
 printing_log_OnlyOneHeaderRow = '\
-Found 14 rows altogether\n\
+Found 18 rows altogether\n\
 \n\
 \n\
-2020-03-29 10:22:43.925 (7): Door at fully open position\n\
-2020-03-29 10:23:41.979 (2): Close door requested\n\
+2020-03-29 10:22:43.925 (11): Door at fully open position\n\
+2020-03-29 10:23:52.427 (3): Door is closing and is at or below 50 mm from fully closed position\n\
+---\n\
+\n\
+\n\
+Found 1 problem\
+'
+
+printing_log_CsvFileWithDoorHasStopped = '\
+Found 57 rows altogether\n\
+\n\
+\n\
+25/07/2020 18:56:40 (38): Door at fully open position\n\
+25/07/2020 19:11:01 (3): Door is closing and is at or below 50 mm from fully closed position\n\
 ---\n\
 \n\
 \n\
@@ -92,6 +104,10 @@ class TestDoorLogAnalyzer(unittest.TestCase):
     def test_log_OnlyOneHeaderRow(self):
         value = call_command("python DoorLogAnalyzer.py test/Log_OnlyOneHeaderRow.xlsx")
         self.assertEqual(printing_log_OnlyOneHeaderRow, value)
+
+    def test_log_CsvFileWithDoorHasStopped(self):
+        value = call_command("python DoorLogAnalyzer.py test/Log_CsvFileWithDoorHasStopped.csv")
+        self.assertEqual(printing_log_CsvFileWithDoorHasStopped, value)
 
 
 if __name__ == '__main__':

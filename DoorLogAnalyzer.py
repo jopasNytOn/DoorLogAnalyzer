@@ -4,24 +4,80 @@ import sys
 import time
 
 if len(sys.argv) != 2:
-    sys.exit('Version 0.03, Usage: DoorLogAnalyzer <xlsx-file>')
+    sys.exit('Version 0.04, Usage: DoorLogAnalyzer <csv-file / xlsx-file>')
 
 def convert_date_string_to_date_timestamp(date_string):
-    date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
+    date_object = None
+    try:
+        date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
+    except ValueError:
+        try:
+            date_object = datetime.strptime(date_string, '%d/%m/%Y %H:%M:%S')
+        except ValueError:
+            pass
     return time.mktime(date_object.timetuple())
 
-maximum_seconds_to_request_close = 20
+maximum_seconds_to_request_close = 30
 
 
-class ExcelFile():
+class File():
     def __init__(self, filename):
         self.filename = filename
-        self.wb = load_workbook(filename=self.filename)
-        self.sheet = self.wb['Sheet 1']
 
         # First a couple of rows contain special text that are ignored.
         # The data is read from last to first row due to ascending time.
         self.row = 1
+
+    def data_remains(self):
+        self.row -= 1
+        return self.row != self.last_special_row
+
+    def get_row(self):
+        return self.row
+
+
+class CSVFile(File):
+    def __init__(self, filename):
+        super().__init__(filename)
+
+        self.lines = []
+        self.last_special_row = self.row - 1
+        file = open(filename, 'r')
+        for line in file:
+            line = line.strip()
+            self.lines.append(line)
+            self.row += 1
+        self.row -= 1
+
+        print('Found {} rows altogether'.format(self.row))
+
+    def get_data_from_cell(self, column, row):
+        line = self.lines[row]
+        column = int(column, 16) - int('A', 16)
+        return self.get_substring(line, ";", column)
+
+    def get_date(self):
+        date = self.get_data_from_cell('E', self.row)
+        return date, convert_date_string_to_date_timestamp(date)
+
+    def get_message(self):
+        return self.get_data_from_cell('D', self.row)
+
+    def get_substring(self, string, delimiter, count):
+        while count > 0:
+            string = string[string.find(delimiter) + 1:]
+            count -= 1
+        string = string[:string.find(delimiter)]
+        return string
+
+
+class ExcelFile(File):
+    def __init__(self, filename):
+        super().__init__(filename)
+
+        self.wb = load_workbook(filename=self.filename)
+        self.sheet = self.wb['Sheet 1']
+
         if self.get_data_from_cell('A', 1) == "Time":
             self.row += 1
         try:
@@ -33,17 +89,11 @@ class ExcelFile():
         while self.get_data_from_cell('C', self.row) != None:
             self.row += 1
         self.row -= 1
+
         print('Found {} rows altogether'.format(self.row))
 
     def get_data_from_cell(self, column, row):
         return self.sheet['{}{}'.format(column, row)].value
-
-    def data_remains(self):
-        self.row -= 1
-        return self.row != self.last_special_row
-
-    def get_row(self):
-        return self.row
 
     def get_date(self):
         date = self.get_data_from_cell('A', self.row)
@@ -54,10 +104,10 @@ class ExcelFile():
 
 
 class Message():
-    def __init__(self, excel_file):
-        self.row = excel_file.get_row()
-        self.date, self.datetime = excel_file.get_date()
-        self.message = excel_file.get_message()
+    def __init__(self, input_file):
+        self.row = input_file.get_row()
+        self.date, self.datetime = input_file.get_date()
+        self.message = input_file.get_message()
 
     def is_jam_starting(self):
         return self.message == 'Door at fully open position'
@@ -66,7 +116,7 @@ class Message():
         return self.message == 'Open door requested' or self.message == 'Photo cell'
 
     def is_jam_ending(self):
-        return self.message == 'Close door requested'
+        return self.message == 'Door is closing and is at or below 50 mm from fully closed position'
 
 
 class Jam():
@@ -87,17 +137,22 @@ class Jam():
 
     def print(self):
         print('{} ({}): Door at fully open position'.format(self.starting_message.date, self.starting_message.row))
-        print('{} ({}): Close door requested'.format(self.ending_message.date, self.ending_message.row))
+        print('{} ({}): Door is closing and is at or below 50 mm from fully closed position'.format(self.ending_message.date, self.ending_message.row))
         print('---')
 
 
-def collect_jams(excel_filename):
-    excel_file = ExcelFile(excel_filename)
-
+def collect_jams(filename):
     problems = 0
     active_jam = Jam(None)
-    while excel_file.data_remains():
-        message = Message(excel_file)
+    input_file = None
+
+    if filename.find("xlsx") > 0:
+        input_file = ExcelFile(filename)
+    elif filename.find("csv") > 0:
+        input_file = CSVFile(filename)
+
+    while input_file.data_remains():
+        message = Message(input_file)
         if message.is_jam_starting():
             active_jam = Jam(message)
         elif message.is_needed_more_time_to_keep_open():
@@ -109,6 +164,7 @@ def collect_jams(excel_filename):
                 active_jam.print()
                 problems += 1
             active_jam = Jam(None)
+
     return problems
 
 
