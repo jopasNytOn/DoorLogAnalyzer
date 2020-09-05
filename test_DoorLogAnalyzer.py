@@ -71,7 +71,19 @@ Found 57 rows altogether\n\
 \n\
 \n\
 25/07/2020 18:56:40 (38): Door at fully open position\n\
-25/07/2020 19:11:01 (3): Door is closing and is at or below 50 mm from fully closed position\n\
+25/07/2020 19:08:18 (26): Door has stopped\n\
+---\n\
+\n\
+\n\
+Found 1 problem\
+'
+
+printing_log_CsvFileWithDoorMovedWhileJammed = '\
+Found 16 rows altogether\n\
+\n\
+\n\
+26/08/2020 10:16:26 (6): Door at fully open position\n\
+26/08/2020 10:17:56 (4): Door has stopped\n\
 ---\n\
 \n\
 \n\
@@ -108,6 +120,10 @@ class TestDoorLogAnalyzer(unittest.TestCase):
     def test_log_CsvFileWithDoorHasStopped(self):
         value = call_command("python DoorLogAnalyzer.py test/Log_CsvFileWithDoorHasStopped.csv")
         self.assertEqual(printing_log_CsvFileWithDoorHasStopped, value)
+
+    def test_log_CsvFileWithDoorMovedWhileJammed(self):
+        value = call_command("python DoorLogAnalyzer.py test/Log_CsvFileWithDoorMovedWhileJammed.csv")
+        self.assertEqual(printing_log_CsvFileWithDoorMovedWhileJammed, value)
 
 
 if __name__ == '__main__':

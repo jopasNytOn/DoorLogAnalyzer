@@ -1,0 +1,16 @@
+Active;Type;ID;Message;Date&Time;
+Yes;event;17;Door is opening and at or below 50 mm from fully closed position;26/08/2020 10:24:48;
+Yes;event;15;Open door requested;26/08/2020 10:24:48;
+Yes;event;22;Close door requested;26/08/2020 10:18:07;
+Yes;event;1;Door has stopped;26/08/2020 10:17:56;
+Yes;event;22;Close door requested;26/08/2020 10:16:27;
+Yes;event;21;Door at fully open position;26/08/2020 10:16:26;
+Yes;event;18;Door opening;26/08/2020 10:16:19;
+Yes;event;15;Open door requested;26/08/2020 10:16:18;
+Yes;event;25;Door closing;26/08/2020 10:16:13;
+Yes;event;23;Door has begun to close;26/08/2020 10:16:12;
+Yes;event;22;Close door requested;26/08/2020 10:16:11;
+Yes;event;21;Door at fully open position;26/08/2020 10:16:00;
+Yes;event;18;Door opening;26/08/2020 10:15:47;
+Yes;event;17;Door is opening and at or below 50 mm from fully closed position;26/08/2020 10:15:46;
+Yes;event;15;Open door requested;26/08/2020 10:15:45;

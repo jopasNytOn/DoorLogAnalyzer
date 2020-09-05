@@ -4,7 +4,7 @@ import sys
 import time
 
 if len(sys.argv) != 2:
-    sys.exit('Version 0.04, Usage: DoorLogAnalyzer <csv-file / xlsx-file>')
+    sys.exit('Version 0.05, Usage: DoorLogAnalyzer <csv-file / xlsx-file>')
 
 def convert_date_string_to_date_timestamp(date_string):
     date_object = None
@@ -116,7 +116,8 @@ class Message():
         return self.message == 'Open door requested' or self.message == 'Photo cell'
 
     def is_jam_ending(self):
-        return self.message == 'Door is closing and is at or below 50 mm from fully closed position'
+        return self.message == 'Door is closing and is at or below 50 mm from fully closed position' or \
+               self.message == 'Door has stopped'
 
 
 class Jam():
@@ -137,7 +138,7 @@ class Jam():
 
     def print(self):
         print('{} ({}): Door at fully open position'.format(self.starting_message.date, self.starting_message.row))
-        print('{} ({}): Door is closing and is at or below 50 mm from fully closed position'.format(self.ending_message.date, self.ending_message.row))
+        print('{} ({}): {}'.format(self.ending_message.date, self.ending_message.row, self.ending_message.message))
         print('---')
 
 
@@ -163,6 +164,8 @@ def collect_jams(filename):
                     print('\n')
                 active_jam.print()
                 problems += 1
+            elif message.message == 'Door has stopped':
+                continue
             active_jam = Jam(None)
 
     return problems
