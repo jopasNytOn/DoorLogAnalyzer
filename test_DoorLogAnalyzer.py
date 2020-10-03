@@ -90,6 +90,18 @@ Found 16 rows altogether\n\
 Found 1 problem\
 '
 
+printing_log_DoorJammedWhileClosing = '\
+Found 14 rows altogether\n\
+\n\
+\n\
+2020-09-25 12:52:33 (9): Door at fully open position\n\
+2020-09-25 12:55:51 (3): Door is closing and is at or below 50 mm from fully closed position\n\
+---\n\
+\n\
+\n\
+Found 1 problem\
+'
+
 
 class TestDoorLogAnalyzer(unittest.TestCase):
 
@@ -125,6 +137,9 @@ class TestDoorLogAnalyzer(unittest.TestCase):
         value = call_command("python DoorLogAnalyzer.py test/Log_CsvFileWithDoorMovedWhileJammed.csv")
         self.assertEqual(printing_log_CsvFileWithDoorMovedWhileJammed, value)
 
+    def test_log_DoorJammedWhileClosing(self):
+        value = call_command("python DoorLogAnalyzer.py test/Log_DoorJammedWhileClosing.xlsx")
+        self.assertEqual(printing_log_DoorJammedWhileClosing, value)
 
 if __name__ == '__main__':
     unittest.main()

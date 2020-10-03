@@ -4,17 +4,19 @@ import sys
 import time
 
 if len(sys.argv) != 2:
-    sys.exit('Version 0.05, Usage: DoorLogAnalyzer <csv-file / xlsx-file>')
+    sys.exit('Version 0.06, Usage: DoorLogAnalyzer <csv-file / xlsx-file>')
 
 def convert_date_string_to_date_timestamp(date_string):
-    date_object = None
-    try:
-        date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
-    except ValueError:
+    date_object = date_string
+    date_format_strings = ['%d/%m/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f']
+    for i in date_format_strings:
         try:
-            date_object = datetime.strptime(date_string, '%d/%m/%Y %H:%M:%S')
+            date_object = datetime.strptime(date_string, i)
+            break
+        except TypeError:
+            break
         except ValueError:
-            pass
+            continue
     return time.mktime(date_object.timetuple())
 
 maximum_seconds_to_request_close = 30
@@ -76,15 +78,20 @@ class ExcelFile(File):
         super().__init__(filename)
 
         self.wb = load_workbook(filename=self.filename)
-        self.sheet = self.wb['Sheet 1']
+        self.sheet = None
+        sheets = ['report-FT708 (1)', 'Sheet 1']
+        for i in sheets:
+            try:
+                self.sheet = self.wb[i]
+            except KeyError:
+                continue
 
+        if self.get_data_from_cell('A', 1) == "Active":
+            self.row += 1
         if self.get_data_from_cell('A', 1) == "Time":
             self.row += 1
-        try:
-            if self.get_data_from_cell('A', 2) == "Column1":
-                self.row += 1
-        except ValueError:
-            pass
+        if self.get_data_from_cell('A', 2) == "Column1":
+            self.row += 1
         self.last_special_row = self.row - 1
         while self.get_data_from_cell('C', self.row) != None:
             self.row += 1
@@ -96,7 +103,12 @@ class ExcelFile(File):
         return self.sheet['{}{}'.format(column, row)].value
 
     def get_date(self):
-        date = self.get_data_from_cell('A', self.row)
+        date = None
+        date_columns = ['A', 'E']
+        for i in date_columns:
+            date = self.get_data_from_cell(i, self.row)
+            if date != 'No' and date != 'Yes':
+                break
         return date, convert_date_string_to_date_timestamp(date)
 
     def get_message(self):
